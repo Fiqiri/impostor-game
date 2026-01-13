@@ -1,0 +1,340 @@
+{% extends "game/base.html" %}
+{% block title %}Impostor{% endblock %}
+
+{% block content %}
+  <div class="panel">
+    <h1 class="title">Fillo lojën</h1>
+
+    <div style="height:14px"></div>
+
+    <form method="post" action="{% url 'create_room' %}" id="startForm">
+      {% csrf_token %}
+
+      <!-- Hidden field që i dërgohet Django-s (backend pret "names" si rreshta) -->
+      <textarea name="names" id="namesHidden" style="display:none;"></textarea>
+
+      <div class="row" style="align-items:flex-start;">
+        <!-- LEFT: Names -->
+        <div style="flex:1; min-width:260px">
+          <div class="subtitle" style="margin-bottom:8px; font-weight:700;">Lojtarët</div>
+
+          <div id="namesList" style="display:grid; gap:10px;"></div>
+
+          <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-ghost" type="button" id="addBtn">
+            </button>
+            <button class="btn btn-ghost" type="button" id="clearNamesBtn" style="width:auto; padding:10px 12px;">
+              Pastro emrat
+            </button>
+          </div>
+
+          <div style="margin-top:10px;" class="subtitle">
+            <span id="countLabel">Lojtarë: 0/8</span>
+            <span id="countHint" style="display:block; margin-top:6px;"></span>
+          </div>
+        </div>
+
+        <!-- RIGHT: Options + Start -->
+        <div style="flex:1; min-width:220px">
+          <label class="subtitle" style="display:block;margin-bottom:8px; font-weight:700;">Kategoria (opsionale)</label>
+          <select name="category" id="categorySelect">
+            <option value="">Kategoria</option>
+            {% for c in categories %}
+              <option value="{{ c }}">{{ c }}</option>
+            {% endfor %}
+          </select>
+
+          <div style="height:12px"></div>
+
+          <label class="subtitle" style="display:block;margin-bottom:8px; font-weight:700;">Impostorë</label>
+          <select name="impostor_count" id="impostorSelect">
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+          </select>
+
+          <div style="height:14px"></div>
+
+          <button class="btn btn-primary" type="submit" id="startBtn">Fillo</button>
+
+          <div style="height:10px"></div>
+          <div class="subtitle">
+            Tip: 4–7 zakonisht 1 impostor. Për 8 mund 2.
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const LS_NAMES = "impostor_last_names_v2";
+  const LS_CATEGORY = "impostor_last_category_v1";
+  const LS_IMP = "impostor_last_impostor_count_v1";
+
+  const namesList = document.getElementById("namesList");
+  const namesHidden = document.getElementById("namesHidden");
+  const form = document.getElementById("startForm");
+  const addBtn = document.getElementById("addBtn");
+  const clearBtn = document.getElementById("clearNamesBtn");
+  const countLabel = document.getElementById("countLabel");
+  const countHint = document.getElementById("countHint");
+  const startBtn = document.getElementById("startBtn");
+
+  const categorySelect = document.getElementById("categorySelect");
+  const impostorSelect = document.getElementById("impostorSelect");
+
+  const MIN = 4;
+  const MAX = 8;
+
+  function cleanName(s){
+    return (s || "").trim().replace(/\s+/g, " ");
+  }
+
+  function getInputs(){
+    return Array.from(namesList.querySelectorAll("input[data-player]"));
+  }
+
+  function getNames(){
+    const vals = getInputs().map(i => cleanName(i.value)).filter(Boolean);
+
+    // unique keep order
+    const seen = new Set();
+    const uniq = [];
+    for(const n of vals){
+      if(!seen.has(n)){
+        uniq.push(n);
+        seen.add(n);
+      }
+    }
+    return uniq;
+  }
+
+  function updateHidden(){
+    const names = getNames();
+    namesHidden.value = names.join("\n");
+    return names;
+  }
+
+  function updateUI(){
+    const names = updateHidden();
+    countLabel.textContent = `Lojtarë: ${names.length}/${MAX}`;
+
+    if(names.length < MIN){
+      countHint.textContent = `Duhet të paktën ${MIN} emra për të filluar.`;
+      countHint.style.opacity = "0.9";
+      startBtn.disabled = true;
+      startBtn.style.opacity = "0.6";
+      startBtn.style.cursor = "not-allowed";
+    } else if(names.length > MAX){
+      countHint.textContent = `Maksimumi është ${MAX} emra. Fshi ndonjë.`;
+      startBtn.disabled = true;
+      startBtn.style.opacity = "0.6";
+      startBtn.style.cursor = "not-allowed";
+    } else {
+      countHint.textContent = "";
+      startBtn.disabled = false;
+      startBtn.style.opacity = "1";
+      startBtn.style.cursor = "pointer";
+    }
+  }
+
+  function ensureOneEmptyAtEnd(){
+    const inputs = getInputs();
+    if(inputs.length === 0){
+      addRow("");
+      return;
+    }
+    const last = inputs[inputs.length - 1];
+    const lastVal = cleanName(last.value);
+    if(lastVal && inputs.length < MAX){
+      addRow("");
+    }
+  }
+
+  function focusNext(currentIdx){
+    const inputs = getInputs();
+    if(currentIdx + 1 < inputs.length){
+      inputs[currentIdx + 1].focus();
+      inputs[currentIdx + 1].select();
+    }
+  }
+
+  function addRow(value=""){
+    const idx = getInputs().length + 1;
+
+    const wrap = document.createElement("div");
+    wrap.style.display = "grid";
+    wrap.style.gridTemplateColumns = "44px 1fr 44px";
+    wrap.style.gap = "10px";
+    wrap.style.alignItems = "center";
+
+    const num = document.createElement("div");
+    num.className = "badge";
+    num.style.textAlign = "center";
+    num.textContent = idx;
+
+    const input = document.createElement("input");
+    input.setAttribute("data-player", "1");
+    input.type = "text";
+    input.inputMode = "text";
+    input.autocomplete = "off";
+    input.spellcheck = false;
+    input.placeholder = "Emri";
+    input.value = value;
+    input.style.width = "100%";
+    input.style.borderRadius = "12px";
+    input.style.padding = "12px";
+    input.style.border = "1px solid var(--border)";
+    input.style.background = "#0e1122";
+    input.style.color = "var(--text)";
+
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "btn btn-ghost";
+    del.textContent = "✕";
+    del.style.width = "44px";
+    del.style.padding = "10px 0";
+
+    del.addEventListener("click", () => {
+      wrap.remove();
+      renumber();
+      ensureOneEmptyAtEnd();
+      updateUI();
+      saveNames();
+    });
+
+    input.addEventListener("input", () => {
+      // kur plotësohet një rresht, siguro rresht bosh në fund
+      ensureOneEmptyAtEnd();
+      updateUI();
+      saveNames();
+    });
+
+    input.addEventListener("keydown", (e) => {
+      const inputs = getInputs();
+      const myIndex = inputs.indexOf(input);
+
+      if(e.key === "Enter"){
+        e.preventDefault();
+        ensureOneEmptyAtEnd();
+        updateUI();
+        focusNext(myIndex);
+      }
+
+      // Backspace në rresht bosh: kthehu te rreshti para (opsional, UX nice)
+      if(e.key === "Backspace" && cleanName(input.value) === "" && myIndex > 0){
+        // nëse ka shumë rreshta bosh, fshij këtë
+        // por mos e fshij nëse është i vetmi
+        const inputsNow = getInputs();
+        const empties = inputsNow.filter(i => cleanName(i.value) === "").length;
+        if(empties > 1){
+          e.preventDefault();
+          wrap.remove();
+          renumber();
+          updateUI();
+          focusNext(myIndex - 1);
+          saveNames();
+        }
+      }
+    });
+
+    wrap.appendChild(num);
+    wrap.appendChild(input);
+    wrap.appendChild(del);
+    namesList.appendChild(wrap);
+  }
+
+  function renumber(){
+    const rows = Array.from(namesList.children);
+    rows.forEach((row, i) => {
+      const badge = row.querySelector(".badge");
+      if(badge) badge.textContent = String(i + 1);
+    });
+  }
+
+  function setNames(names){
+    namesList.innerHTML = "";
+    const trimmed = (names || []).slice(0, MAX);
+
+    // shto emrat ekzistues
+    for(const n of trimmed){
+      addRow(n);
+    }
+
+    // gjithmonë mbaj një bosh në fund (për të shkruar tjetrin)
+    if(trimmed.length < MAX){
+      addRow("");
+    }
+    renumber();
+    updateUI();
+  }
+
+  function saveNames(){
+    try{
+      const names = getNames();
+      localStorage.setItem(LS_NAMES, JSON.stringify(names));
+      localStorage.setItem(LS_CATEGORY, categorySelect.value);
+      localStorage.setItem(LS_IMP, impostorSelect.value);
+    }catch(e){}
+  }
+
+  function loadSaved(){
+    let savedNames = [];
+    try{
+      const raw = localStorage.getItem(LS_NAMES);
+      if(raw){
+        const arr = JSON.parse(raw);
+        if(Array.isArray(arr)) savedNames = arr.map(cleanName).filter(Boolean);
+      }
+    }catch(e){}
+
+    try{
+      const savedCat = localStorage.getItem(LS_CATEGORY);
+      if(savedCat !== null) categorySelect.value = savedCat;
+    }catch(e){}
+
+    try{
+      const savedImp = localStorage.getItem(LS_IMP);
+      if(savedImp === "1" || savedImp === "2") impostorSelect.value = savedImp;
+    }catch(e){}
+
+    setNames(savedNames);
+  }
+
+  addBtn.addEventListener("click", () => {
+    const inputs = getInputs();
+    if(inputs.length >= MAX) return;
+    addRow("");
+    renumber();
+    const newInputs = getInputs();
+    newInputs[newInputs.length - 1].focus();
+    updateUI();
+  });
+
+  clearBtn.addEventListener("click", () => {
+    if(!confirm("T’i pastroj emrat e ruajtur?")) return;
+    try{ localStorage.removeItem(LS_NAMES); }catch(e){}
+    setNames([]);
+    const first = getInputs()[0];
+    if(first) first.focus();
+  });
+
+  // Para submit: siguro që hidden textarea ka emrat si rreshta
+  form.addEventListener("submit", (e) => {
+    updateUI();
+    const names = updateHidden();
+    if(names.length < MIN || names.length > MAX){
+      e.preventDefault();
+      return;
+    }
+    saveNames();
+  });
+
+  // Init
+  loadSaved();
+  // fokus te rreshti i parë
+  const first = getInputs()[0];
+  if(first) first.focus();
+</script>
+{% endblock %}

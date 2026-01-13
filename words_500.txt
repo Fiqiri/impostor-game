@@ -1,0 +1,15 @@
+Laptop pune|Objekte
+Monitor|Objekte
+Tastierë|Objekte
+Mouse|Objekte
+Printer lazer|Objekte
+Projektor|Objekte
+Kondicioner|Objekte
+Ventilator|Objekte
+Frigorifer|Objekte
+Lavatrice|Objekte
+Furrë|Objekte
+Mikrovalë|Objekte
+Sharrë|Objekte
+Çekiç|Objekte
+Vidë|Objekte

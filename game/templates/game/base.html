@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="sq">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f1220" />
+
+  <meta name="screen-orientation" content="portrait">
+  <meta name="x5-orientation" content="portrait">
+  <meta name="msapplication-orientation" content="portrait">
+
+  <title>{% block title %}Impostor{% endblock %}</title>
+
+  <style>
+    :root{
+      --bg:#0f1220;
+      --card:#171a2b;
+      --border:#2a2f4d;
+      --panel:#101326;
+      --text:#eef1ff;
+      --muted:rgba(238,241,255,.78);
+      --primary:#6e7bff;
+      --primaryText:#0b0d1a;
+    }
+
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto;
+      background:radial-gradient(900px 450px at 50% -5%, rgba(110,123,255,.14), transparent 60%), var(--bg);
+      color:var(--text);
+      display:grid;
+      place-items:center;
+      min-height:100vh;
+      padding:18px;
+    }
+
+    .wrap{ width:min(560px, 100%); }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:12px;
+      padding:0 2px;
+    }
+    .brand{ font-weight:950; letter-spacing:.2px; opacity:.95; }
+
+    .screen{
+      border:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,.03), transparent 70%), var(--card);
+      border-radius:18px;
+      padding:16px;
+      box-shadow:0 12px 40px rgba(0,0,0,.35);
+    }
+
+    /* fade shumë i lehtë (pa translate që duket si "lag") */
+    .page{
+      opacity:0;
+      animation:pageIn .10s ease-out forwards;
+    }
+    @keyframes pageIn{ to{ opacity:1; } }
+
+    /* nëse browseri preferon më pak animacione */
+    @media (prefers-reduced-motion: reduce){
+      .page{ animation:none; opacity:1; }
+      .btn{ transition:none; }
+    }
+
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:16px;
+    }
+
+    .title{ margin:0 0 8px; font-size:24px; font-weight:950; }
+    .subtitle{ margin:0; color:var(--muted); font-size:13px; line-height:1.35; }
+
+    textarea, select, input{
+      width:100%;
+      border-radius:12px;
+      padding:12px;
+      border:1px solid var(--border);
+      background:#0e1122;
+      color:var(--text);
+      outline:none;
+    }
+
+    .btn{
+      width:100%;
+      border:0;
+      border-radius:12px;
+      padding:14px;
+      cursor:pointer;
+      font-weight:900;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      user-select:none;
+      transition:transform .06s ease;
+    }
+    .btn:active{ transform:scale(.99); }
+    .btn-primary{ background:var(--primary); color:var(--primaryText); }
+    .btn-ghost{ background:transparent; border:1px solid var(--border); color:var(--text); }
+
+    .badge{
+      display:inline-block;
+      border:1px solid var(--border);
+      background:rgba(16,19,38,.6);
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .bigName{
+      margin:14px 0 0;
+      padding:16px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:#0e1122;
+      text-align:center;
+      font-size:28px;
+      font-weight:950;
+      letter-spacing:.4px;
+      word-break:break-word;
+    }
+
+    .footerNote{
+      margin-top:12px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    /* portrait lock overlay */
+    #rotateOverlay{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(15,18,32,.92);
+      z-index:9999;
+      place-items:center;
+    }
+    #rotateOverlay .rotBox{
+      width:min(420px,92vw);
+      border:1px solid var(--border);
+      background:var(--card);
+      border-radius:18px;
+      padding:20px;
+      text-align:center;
+      box-shadow:0 12px 40px rgba(0,0,0,.35);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">Impostor 🎭</div>
+      {% block top_right %}{% endblock %}
+    </div>
+
+    <div class="screen page">
+      {% block content %}{% endblock %}
+    </div>
+
+    <div class="footerNote">Pass &amp; Play • Një telefon</div>
+  </div>
+
+  <!-- Portrait overlay -->
+  <div id="rotateOverlay">
+    <div class="rotBox">
+      <div style="font-size:28px">📱↩️</div>
+      <div style="margin-top:10px;font-weight:900">Ktheje telefonin në Portrait</div>
+      <div style="opacity:.8;margin-top:6px">Kjo lojë luhet vetëm vertikalisht</div>
+    </div>
+  </div>
+
+  <script>
+    function updateOrientation(){
+      const o = document.getElementById("rotateOverlay");
+      const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+      o.style.display = isLandscape ? "grid" : "none";
+    }
+    window.addEventListener("resize", updateOrientation);
+    window.addEventListener("orientationchange", updateOrientation);
+    updateOrientation();
+  </script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

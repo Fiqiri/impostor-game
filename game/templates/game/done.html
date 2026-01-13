@@ -1,0 +1,61 @@
+{% extends "game/base.html" %}
+{% block title %}Loja fillon{% endblock %}
+
+{% block content %}
+  <div class="panel">
+    <h1 class="title" style="text-align:center;margin-bottom:6px">Loja fillon ✅</h1>
+    <p class="subtitle" style="text-align:center">
+      Të gjithë i panë rolet. Tani filloni lojën.
+    </p>
+
+    <div style="height:14px"></div>
+
+    <div class="panel" style="background:#0e1122">
+      <div class="subtitle" style="text-align:center">Radha e parë</div>
+      <div class="bigName" style="font-size:26px;margin-top:10px">{{ room.starter_name }}</div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <button class="btn btn-ghost" type="button" id="revealBtn">
+      Zbulo impostorin
+    </button>
+
+    <div id="revealBox" style="display:none; margin-top:12px;">
+      <div class="panel" style="background:#0e1122">
+        <div class="subtitle" style="text-align:center">Impostori ishte</div>
+        <div class="bigName" style="font-size:22px;margin-top:10px">
+          {% if impostors|length == 1 %}
+            {{ impostors.0 }}
+          {% else %}
+            {{ impostors|join:", " }}
+          {% endif %}
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="subtitle" style="text-align:center">Fjala e raundit</div>
+        <div class="bigName" style="font-size:22px;margin-top:10px">{{ room.word }}</div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <a class="btn btn-primary" style="text-decoration:none;" href="{% url 'home' %}">
+      Luaj përsëri
+    </a>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const btn = document.getElementById("revealBtn");
+  const box = document.getElementById("revealBox");
+
+  btn.addEventListener("click", () => {
+    const isOpen = box.style.display !== "none";
+    box.style.display = isOpen ? "none" : "block";
+    btn.textContent = isOpen ? "Zbulo impostorin" : "Fshih impostorin";
+  });
+</script>
+{% endblock %}

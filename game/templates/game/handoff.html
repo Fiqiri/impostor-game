@@ -1,0 +1,21 @@
+{% extends "game/base.html" %}
+{% block title %}Radha{% endblock %}
+
+{% block content %}
+  <div class="panel">
+    {% if room.category %}
+      <div class="badge">Kategoria: {{ room.category }}</div>
+      <div style="height:10px"></div>
+    {% endif %}
+
+    <div class="bigName">{{ current.name }}</div>
+
+    <div style="height:14px"></div>
+
+    <a class="btn btn-primary" style="text-decoration:none;" href="{% url 'reveal' room.code %}">
+      Hape
+    </a>
+
+    <div style="height:10px"></div>
+  </div>
+{% endblock %}

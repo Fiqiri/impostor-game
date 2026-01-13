@@ -1,0 +1,37 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="17">
+            <item index="0" class="java.lang.String" itemvalue="mysqlclient" />
+            <item index="1" class="java.lang.String" itemvalue="coverage" />
+            <item index="2" class="java.lang.String" itemvalue="pytest" />
+            <item index="3" class="java.lang.String" itemvalue="reportlab" />
+            <item index="4" class="java.lang.String" itemvalue="google-cloud-storage" />
+            <item index="5" class="java.lang.String" itemvalue="requests" />
+            <item index="6" class="java.lang.String" itemvalue="gunicorn" />
+            <item index="7" class="java.lang.String" itemvalue="pydevd-pycharm" />
+            <item index="8" class="java.lang.String" itemvalue="ddtrace" />
+            <item index="9" class="java.lang.String" itemvalue="google-cloud-logging" />
+            <item index="10" class="java.lang.String" itemvalue="boto3" />
+            <item index="11" class="java.lang.String" itemvalue="holidays" />
+            <item index="12" class="java.lang.String" itemvalue="future" />
+            <item index="13" class="java.lang.String" itemvalue="PyPDF2" />
+            <item index="14" class="java.lang.String" itemvalue="pytz" />
+            <item index="15" class="java.lang.String" itemvalue="pyjwt" />
+            <item index="16" class="java.lang.String" itemvalue="hypothesis" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8Inspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="E302" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

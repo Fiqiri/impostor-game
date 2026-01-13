@@ -1,0 +1,22 @@
+{% extends "game/base.html" %}
+{% block title %}Roli{% endblock %}
+
+{% block content %}
+  <div class="panel">
+
+    {% if show_word %}
+      <div class="bigName" style="font-size:26px">{{ room.word }}</div>
+      <div style="height:10px"></div>
+    {% else %}
+      <div class="bigName" style="font-size:26px">🕵️ IMPOSTOR</div>
+      <div style="height:10px"></div>
+      <div class="subtitle" style="text-align:center;">Ti nuk e di fjalën. Bëj sikur e di.</div>
+    {% endif %}
+
+    <form method="post" action="{% url 'next_player' room.code %}">
+      {% csrf_token %}
+      <div style="height:14px"></div>
+      <button class="btn btn-primary" type="submit">Next</button>
+    </form>
+  </div>
+{% endblock %}
